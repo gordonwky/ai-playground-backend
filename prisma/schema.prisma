@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // hashed
+  plan      String   @default("free") // free / pro / enterprise
+  quotaUsed Int      @default(0)
+  quotaMax  Int      @default(20)     // free: 20/day, pro: 2000/day
+  sessions  Session[]
+  createdAt DateTime @default(now())
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  prompt    String
+  runs      ModelRun[]
+  createdAt DateTime @default(now())
+}
+
+
+
+model ModelRun {
+  id           String   @id @default(cuid())
+  sessionId    String
+  provider     String
+  model        String
+  prompt       String?  
+  responseMd   String   @default("")
+  status       String
+  cost         Float?   // 儲存 cost
+  chars        Int?     // 儲存字元數
+  createdAt    DateTime @default(now())
+
+  session      Session  @relation(fields: [sessionId], references: [id])
+}
+
+
