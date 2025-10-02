@@ -19,10 +19,12 @@ export class AuthController {
     // 👇 Set cookie
     res.cookie('token', result.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 1000, 
+      secure: true,        
+      sameSite: 'none',    
+      maxAge: 60 * 60 * 24 * 1000, // 1 day
       path: '/',
     });
+
 
     return { token: result.token, userId: result.userId };
   }
